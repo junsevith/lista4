@@ -36,4 +36,25 @@ public class GoBoard {
          }
       }
    }
+
+   public boolean placeStone(int x, int y, Color color){
+      return board[x][y].setTile(color);
+   }
+
+   public String printBoard(){
+      StringBuilder sb = new StringBuilder();
+      for(int i = 0; i < 19; i++){
+         for(int j = 0; j < 19; j++){
+            if(board[i][j].getStoneColor() == null){
+               sb.append("  ");
+            } else if(board[i][j].getStoneColor() == Color.BLACK){
+               sb.append("B ");
+            } else {
+               sb.append("W ");
+            }
+         }
+         sb.append("\n");
+      }
+      return sb.toString();
+   }
 }

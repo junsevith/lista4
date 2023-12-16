@@ -60,7 +60,7 @@ public class GoBoard {
     * @return true jeśli udało się ustawić kamień, false jeśli nie
     */
    public boolean placeStone(int x, int y, Color color){
-      return board[x][y].setStone(color);
+      return board[x][y].placeStone(color);
    }
 
    /**

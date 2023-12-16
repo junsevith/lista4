@@ -48,6 +48,9 @@ public class GoTile {
          2, 3,
          3, 2
    );
+   private Integer reverseDirection(Integer direction) {
+      return revDir.get(direction);
+   }
 
    public GoTile(GameCounter counter) {
       this.counter = counter;
@@ -57,22 +60,50 @@ public class GoTile {
       this.neighbors = neighbors;
    }
 
-   public void giveBreath() {
-
+   /**
+    * Resetuje pole do stanu początkowego
+    */
+   private void resetTile() {
+      stoneColor = null;
+      breathCount = 0;
+      Arrays.fill(breath, false);
+      Arrays.fill(dependent, false);
+   }
+   public void giveBreath(int direction) {
+      breath[direction] = true;
+      breathCount += 1;
    }
 
-   public void takeBreath() {
+   public void takeBreath(int direction) {
+      breath[direction] = false;
+      breathCount -= 1;
 
+      if (breathCount == 0) {
+         counter.addCapturedStone(stoneColor);
+         for (int i = 0; i < 4; i++) {
+            if (dependent[i]) {
+               neighbors[i].takeBreath(reverseDirection(i));
+            }
+         }
+         resetTile();
+      }
    }
 
-   public boolean setTile(Color color) {
+   /**
+    * Ustawia kamień na polu
+    *
+    * @param color Kolor kamienia
+    * @return True, jeśli udało się ustawić kamień
+    */
+   public boolean setStone(Color color) {
       if (stoneColor != null) {
          return false;
-      } else if (getNeighbors(Color.opposite(color)).size() == 4) {
+      } else if (getNeighbors(color.opposite()).size() == 4) {
+         //TODO: sprawdzić czy skuje jakieś kamienie
          return false;
       } else {
          stoneColor = color;
-
+         checkNeighbors();
          return true;
       }
    }
@@ -97,31 +128,35 @@ public class GoTile {
       return matchingNeighbors;
    }
 
+   /**
+    * Sprawdza sąsiadów i aktualizuje oddechy oraz zależności
+    */
    private void checkNeighbors() {
-      for (Integer neighbor : getNeighbors(null)) {
-         breath[neighbor] = true;
-         breathCount += 1;
+      for (Integer direction : getNeighbors(null)) {
+         this.giveBreath(direction);
       }
 
-      for (Integer neighbor : getNeighbors(stoneColor)) {
-         if (neighbors[neighbor].thereAreOtherBreaths(revDir.get(neighbor))) {
-            breath[neighbor] = true;
-            breathCount += 1;
+      for (Integer direction : getNeighbors(stoneColor)) {
+         if (neighbors[direction].thereAreOtherBreaths(reverseDirection(direction))) {
+            this.giveBreath(direction);
          } else {
-            dependent[neighbor] = true;
+            dependent[direction] = true;
          }
+      }
 
+      for (Integer direction : getNeighbors(stoneColor.opposite())) {
+           takeBreath(reverseDirection(direction));
+      }
 
-         for (int i = 0; i < 4; i++) {
-            if (breath[i] && thereAreOtherBreaths(i)) {
-               dependent[i] = true;
-            }
+      for (int i = 0; i < 4; i++) {
+         if (breath[i] && thereAreOtherBreaths(i)) {
+            dependent[i] = true;
          }
       }
    }
 
    /**
-    * Sprawdza, czy sąsiad w danym kierunku to jego jedyny oddech
+    * Sprawdza, czy są inni dostawcy oddechu poza sąsiadem w danym kierunku
     *
     * @param direction Kierunek sąsiada
     * @return True, jeśli są inni dostawcy oddechu poza sąsiadem w danym kierunku

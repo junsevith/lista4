@@ -148,7 +148,7 @@ public class GoTile {
       breathCount -= 1;
 
       if (breathCount == 0) {
-         killStone();
+
       }
    }
 
@@ -180,13 +180,16 @@ public class GoTile {
    private void killStone() {
       counter.addCapturedStone(stoneColor);
 
-      for (Integer dir : getNeighbors(stoneColor.opposite())) {
-         neighbors[dir].inheritBreath(this);
+      if (stoneColor != null) {
+         for (Integer dir : getNeighbors(stoneColor.opposite())) {
+            neighbors[dir].inheritBreath(this);
+         }
       }
 
-      for (Integer dir : getNeighbors(stoneColor)) {
-         neighbors[dir].looseBreath(this,this,this);
-      }
+
+//      for (Integer dir : getNeighbors(stoneColor)) {
+//         neighbors[dir].looseBreath(this,this,this);
+//      }
 
       resetTile();
    }

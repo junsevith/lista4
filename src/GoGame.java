@@ -93,6 +93,8 @@ public class GoGame {
       GoPlayer activePlayer = black;
       while (gameIsNotOver()) {
          out.println(board.printBoard());
+         out.println("Punkty czarnego: " + board.getCounter().getWhiteStones());
+         out.println("Punkty białego: " + board.getCounter().getBlackStones());
          out.println("Teraz ruch wykonuje " + activePlayer.getName());
          activePlayer.takeTurn();
          activePlayer = (activePlayer == black ? white : black);

@@ -15,6 +15,10 @@ public class GoBoard {
       setNeighbors();
    }
 
+   public GameCounter getCounter() {
+      return counter;
+   }
+
    /**
     * Ustawia sąsiadów dla każdego pola
     */

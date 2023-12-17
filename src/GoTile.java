@@ -159,14 +159,27 @@ public class GoTile {
     * @param source pole, które zapoczątkowało całą akcję (żeby metoda nie wywołała się drugi raz na tym samym polu)
     */
    public void looseBreath(GoTile tile, GoTile invoker, GoTile source) {
+//      if (stoneColor == null) {
+//         return;
+//      }
       breathTiles.remove(tile);
       breathCount -= 1;
 
-      for (Integer dir : getNeighbors(stoneColor)) {
+      /*for (Integer dir : getNeighbors(stoneColor)) {
          if (neighbors[dir] != tile && neighbors[dir] != source && neighbors[dir] != invoker) {
             neighbors[dir].looseBreath(tile, this, source);
          }
+      }*/
+
+      for (int i = 0; i < 4; i++) {
+         GoTile neighbor = neighbors[i];
+         if ( neighbor != null && neighbor.stoneColor == stoneColor) {
+            if (neighbor != tile && neighbor != source && neighbor != invoker) {
+               neighbor.looseBreath(tile, this, source);
+            }
+         }
       }
+
 
       if (breathTiles.isEmpty()) {
          killStone();
@@ -180,10 +193,14 @@ public class GoTile {
    private void killStone() {
       counter.addCapturedStone(stoneColor);
 
-      if (stoneColor != null) {
-         for (Integer dir : getNeighbors(stoneColor.opposite())) {
-            neighbors[dir].inheritBreath(this);
-         }
+//      if (stoneColor != null) {
+//         for (Integer dir : getNeighbors(stoneColor.opposite())) {
+//            neighbors[dir].inheritBreath(this);
+//         }
+//      }
+
+      for (Integer dir : getNeighbors(stoneColor.opposite())) {
+         neighbors[dir].inheritBreath(this);
       }
 
 
@@ -277,7 +294,7 @@ public class GoTile {
     */
    private void setupStone(Color color) {
       stoneColor = color;
-      checkNeighborsV2();
+      checkNeighborsV3();
    }
 
    /**
@@ -339,8 +356,42 @@ public class GoTile {
             neighbors[direction].looseBreath(this, this, this);
          }
       }
+   }
 
+   private void checkNeighborsV3() {
+      for (int i = 0; i < 4; i++) {
+         GoTile neighbor = neighbors[i];
+         if (neighbor != null ) {
+            if (neighbor.stoneColor == stoneColor.opposite()) {
+               neighbor.looseBreath(this, this, neighbor);
+            } else if (neighbor.stoneColor == null) {
+               this.inheritBreath(neighbor);
+            }
+         }
+      }
 
+      if (!getNeighbors(stoneColor).isEmpty()) {
+         for (int i = 0; i < 4; i++) {
+            GoTile neighbor = neighbors[i];
+            if (neighbor != null) {
+               if (neighbor.stoneColor == stoneColor) {
+                  this.inheritBreath(neighbor.breathTiles);
+               }
+            }
+         }
+
+         this.looseBreath(this, this, this);
+
+         for (int i = 0; i < 4; i++) {
+            GoTile neighbor = neighbors[i];
+            if (neighbor != null) {
+               if (neighbor.stoneColor == stoneColor) {
+                  neighbor.inheritBreath(this.breathTiles);
+                  neighbor.looseBreath(this, this, this);
+               }
+            }
+         }
+      }
    }
 
    private boolean onlyBreath(GoTile tile) {

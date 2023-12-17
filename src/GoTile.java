@@ -22,26 +22,6 @@ public class GoTile {
     */
    private final GameCounter counter;
 
-   /**
-    * Mapa zwracająca przeciwny kierunek
-    */
-   private final Map<Integer, Integer> revDir = Map.of(
-         0, 1,
-         1, 0,
-         2, 3,
-         3, 2
-   );
-
-   /**
-    * Zwraca przeciwny kierunek, używane do wysyłania informacji do sąsiadów, tak aby wiedzieli skąd przyszła informacja
-    *
-    * @param direction Kierunek
-    * @return Przeciwny kierunek
-    */
-   private Integer reverseDirection(Integer direction) {
-      return revDir.get(direction);
-   }
-
    public GoTile(GameCounter counter) {
       this.counter = counter;
    }

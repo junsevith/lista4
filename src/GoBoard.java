@@ -92,4 +92,18 @@ public class GoBoard {
       sb.deleteCharAt(sb.length() - 1);
       return sb.toString();
    }
+
+   public Color[][] getState() {
+      Color[][] state = new Color[boardSize][boardSize];
+      for (int i = 0; i < boardSize; i++) {
+         for (int j = 0; j < boardSize; j++) {
+            state[i][j] = board[i][j].getStoneColor();
+         }
+      }
+      return state;
+   }
+
+   public int getSize() {
+      return boardSize;
+   }
 }

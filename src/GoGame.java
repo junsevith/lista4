@@ -10,9 +10,32 @@ public class GoGame {
    BufferedReader in;
    PrintWriter out;
 
+   GameRecorder recorder = new GameRecorder();
+
    public GoGame(InputStream in, OutputStream out) {
       this.in = new BufferedReader(new InputStreamReader(in));
       this.out = new PrintWriter(out, true);
+   }
+
+   public boolean readAnswer(Set<String> goodAnswers, Set<String> badAnswers) {
+      try {
+         String line = in.readLine();
+         if (line.isEmpty()) {
+            out.println("Zastosowano domyślną odpowiedź: " + badAnswers.iterator().next());
+            return false;
+         } else if (goodAnswers.contains(line)) {
+            return true;
+         } else if (badAnswers.contains(line)) {
+            return false;
+         } else {
+            throw new IllegalArgumentException();
+         }
+      } catch (IOException e) {
+         throw new RuntimeException(e);
+      } catch (IllegalArgumentException e) {
+         out.println("Niepoprawna odpowiedź");
+         return readAnswer(goodAnswers, badAnswers);
+      }
    }
 
    public void startGame() throws IOException {
@@ -55,36 +78,15 @@ public class GoGame {
       if (readAnswer(Set.of("t", "tak"), Set.of("n", "nie"))) {
          out.println("Wybierz kolor: (b/c)");
          if (readAnswer(Set.of("b", "biały"), Set.of("c", "czarny"))) {
-            black = new HumanPlayer(Color.BLACK, board, in);
+            black = new HumanPlayer(Color.BLACK, board, in, out);
             white = new ComputerPlayer(Color.WHITE, board);
          } else {
             black = new ComputerPlayer(Color.BLACK, board);
-            white = new HumanPlayer(Color.WHITE, board, in);
+            white = new HumanPlayer(Color.WHITE, board, in, out);
          }
       } else {
-         black = new HumanPlayer(Color.BLACK, board, in);
-         white = new HumanPlayer(Color.WHITE, board, in);
-      }
-   }
-
-   private boolean readAnswer(Set<String> goodAnswers, Set<String> badAnswers) {
-      try {
-         String line = in.readLine();
-         if (line.isEmpty()) {
-            out.println("Zastosowano domyślną odpowiedź: " + badAnswers.iterator().next());
-            return false;
-         } else if (goodAnswers.contains(line)) {
-            return true;
-         } else if (badAnswers.contains(line)) {
-            return false;
-         } else {
-            throw new IllegalArgumentException();
-         }
-      } catch (IOException e) {
-         throw new RuntimeException(e);
-      } catch (IllegalArgumentException e) {
-         out.println("Niepoprawna odpowiedź");
-         return readAnswer(goodAnswers, badAnswers);
+         black = new HumanPlayer(Color.BLACK, board, in, out);
+         white = new HumanPlayer(Color.WHITE, board, in, out);
       }
    }
 
@@ -96,12 +98,24 @@ public class GoGame {
          out.println("Punkty czarnego: " + board.getCounter().getWhiteStones());
          out.println("Punkty białego: " + board.getCounter().getBlackStones());
          out.println("Teraz ruch wykonuje " + activePlayer.getName());
-         activePlayer.takeTurn();
-         activePlayer = (activePlayer == black ? white : black);
+
+         String move = activePlayer.takeTurn();
+         recorder.recordMove(move);
+         recorder.recordBoardState(board.getState());
+
+         if (activePlayer == black) {
+            activePlayer = white;
+         } else {
+            activePlayer = black;
+         }
       }
    }
 
    private boolean gameIsNotOver() {
-      return true;
+      if (recorder.gameHalted()) {
+         return !(black.askFinish() && white.askFinish());
+      } else {
+         return true;
+      }
    }
 }

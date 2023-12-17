@@ -33,7 +33,7 @@ public class Main {
             "9 5\n" +
             "3 3\n";
       InputStream in = new ByteArrayInputStream(input.getBytes());
-      GoGame game = new GoGame(in, System.out);
+      GoGame game = new GoGame(System.in, System.out);
       try {
          game.startGame();
       } catch (IOException e) {

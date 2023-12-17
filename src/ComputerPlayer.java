@@ -4,8 +4,8 @@ public class ComputerPlayer extends GoPlayer {
    }
 
    @Override
-   public void takeTurn() {
-
+   public String takeTurn() {
+      return "";
    }
 
    @Override
@@ -15,5 +15,10 @@ public class ComputerPlayer extends GoPlayer {
       } else {
          return "komputer grający białymi";
       }
+   }
+
+   @Override
+   boolean askFinish() {
+      return false;
    }
 }

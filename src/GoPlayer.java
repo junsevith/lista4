@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 
 public abstract class GoPlayer {
    final Color color;
@@ -7,7 +7,9 @@ public abstract class GoPlayer {
       this.color = color;
       this.board = board;
    }
-   abstract void takeTurn() throws IOException;
+   abstract String takeTurn() throws IOException;
 
    abstract String getName();
+
+   abstract boolean askFinish();
 }

@@ -25,6 +25,8 @@ public class GoTile {
    private final boolean[] breath = {false, false, false, false};
    private int breathCount = 0;
 
+   private final Set<GoTile> breathTiles = new HashSet<>();
+
    /**
     * Sąsiedzi, którzy otrzymują oddech od pola
     * 0 - Góra
@@ -51,6 +53,7 @@ public class GoTile {
 
    /**
     * Zwraca przeciwny kierunek, używane do wysyłania informacji do sąsiadów, tak aby wiedzieli skąd przyszła informacja
+    *
     * @param direction Kierunek
     * @return Przeciwny kierunek
     */
@@ -79,10 +82,15 @@ public class GoTile {
    /**
     * Zwraca kolor kamienia na polu
     * Null, jeśli pole jest puste
+    *
     * @return Kolor kamienia na polu
     */
    public Color getStoneColor() {
       return stoneColor;
+   }
+
+   public int getBreathCount() {
+      return breathCount;
    }
 
    /**
@@ -103,6 +111,7 @@ public class GoTile {
 
    /**
     * Sprawdza, czy pole ma więcej niż jeden oddech
+    *
     * @return True, jeśli pole ma więcej niż jeden oddech
     */
    private boolean thereAreOtherBreaths() {
@@ -111,6 +120,7 @@ public class GoTile {
 
    /**
     * Dodaje oddech w danym kierunku
+    *
     * @param direction Kierunek z kąd przychodzi oddech
     */
    public void giveBreath(int direction) {
@@ -118,8 +128,19 @@ public class GoTile {
       breathCount += 1;
    }
 
+   public void inheritBreath(Set<GoTile> tiles) {
+      breathTiles.addAll(tiles);
+      breathCount += tiles.size();
+   }
+
+   public void inheritBreath(GoTile tile) {
+      breathTiles.add(tile);
+      breathCount += 1;
+   }
+
    /**
     * Odbiera oddech z danego kierunku
+    *
     * @param direction Kierunek z kąd przychodzi oddech
     */
    public void takeBreath(int direction) {
@@ -132,18 +153,78 @@ public class GoTile {
    }
 
    /**
+    * Odbiera oddech z danego kierunku
+    * @param tile odbiera oddech z tego pola
+    * @param invoker pole, które wywołało metodę (żeby metoda nie wywołała się drugi raz na tym samym polu)
+    * @param source pole, które zapoczątkowało całą akcję (żeby metoda nie wywołała się drugi raz na tym samym polu)
+    */
+   public void looseBreath(GoTile tile, GoTile invoker, GoTile source) {
+      breathTiles.remove(tile);
+      breathCount -= 1;
+
+      for (Integer dir : getNeighbors(stoneColor)) {
+         if (neighbors[dir] != tile && neighbors[dir] != source && neighbors[dir] != invoker) {
+            neighbors[dir].looseBreath(tile, this, source);
+         }
+      }
+
+      if (breathTiles.isEmpty()) {
+         killStone();
+      }
+
+   }
+
+   /**
     * Zabija kamień na polu
     */
    private void killStone() {
       counter.addCapturedStone(stoneColor);
-      for ( Integer dir : getNeighbors(stoneColor.opposite())) {
-         neighbors[dir].giveBreath(reverseDirection(dir));
+
+      for (Integer dir : getNeighbors(stoneColor.opposite())) {
+         neighbors[dir].inheritBreath(this);
       }
-      for ( Integer dir : getNeighbors(stoneColor)) {
-         neighbors[dir].takeBreath(reverseDirection(dir));
+
+      for (Integer dir : getNeighbors(stoneColor)) {
+         neighbors[dir].looseBreath(this,this,this);
       }
 
       resetTile();
+   }
+
+   /**
+    * Ustawia kamień na polu
+    *
+    * @param color Kolor kamienia
+    * @return True, jeśli udało się ustawić kamień
+    */
+   public boolean placeStoneOld(Color color) {
+      if (stoneColor != null) {
+         return false;
+      } else if (getNeighbors(color.opposite()).size() == 4) {
+         //TODO: sprawdzić czy nie zabija się kamieni
+         setupStone(color);
+         return true;
+
+      } else if (getNeighbors(null).isEmpty()) {
+
+         for (Integer direction : getNeighbors(color)) {
+            if (neighbors[direction].thereAreOtherBreaths()) {
+               setupStone(color);
+               return true;
+            }
+         }
+
+         for (Integer dir : getNeighbors(color.opposite())) {
+            if (!neighbors[dir].thereAreOtherBreaths()) {
+               setupStone(color);
+               return true;
+            }
+         }
+         return false;
+      } else {
+         setupStone(color);
+         return true;
+      }
    }
 
    /**
@@ -157,10 +238,27 @@ public class GoTile {
          return false;
       } else if (getNeighbors(color.opposite()).size() == 4) {
          for (Integer direction : getNeighbors(color.opposite())) {
-              if (!neighbors[direction].thereAreOtherBreaths()) {
-                 setupStone(color);
-                 return true;
-              }
+            if (neighbors[direction].onlyBreath(this)) {
+               setupStone(color);
+               return true;
+            }
+         }
+         return false;
+
+      } else if (getNeighbors(null).isEmpty()) {
+
+         for (Integer direction : getNeighbors(color)) {
+            if (neighbors[direction].onlyBreath(this)) {
+               setupStone(color);
+               return true;
+            }
+         }
+
+         for (Integer dir : getNeighbors(color.opposite())) {
+            if (!neighbors[dir].onlyBreath(this)) {
+               setupStone(color);
+               return true;
+            }
          }
          return false;
       } else {
@@ -171,17 +269,24 @@ public class GoTile {
 
    /**
     * Ustawia na polu kamień danego koloru
+    *
     * @param color Kolor kamienia
     */
    private void setupStone(Color color) {
       stoneColor = color;
-      checkNeighbors();
+      checkNeighborsV2();
    }
 
    /**
     * Sprawdza sąsiadów i aktualizuje oddechy oraz zależności
     */
    private void checkNeighbors() {
+      //zabiera oddechy wszystkim sąsiadom przeciwnego koloru
+      for (Integer direction : getNeighbors(stoneColor.opposite())) {
+         neighbors[direction].takeBreath(reverseDirection(direction));
+      }
+
+      //ustawia sobie oddechy od pustych sąsiadów
       for (Integer direction : getNeighbors(null)) {
          this.giveBreath(direction);
 //         System.out.println("daje oddech");
@@ -195,15 +300,47 @@ public class GoTile {
          }
       }
 
-      for (Integer direction : getNeighbors(stoneColor.opposite())) {
-         neighbors[direction].takeBreath(reverseDirection(direction));
-      }
-
       if (thereAreOtherBreaths()) {
-         for ( Integer direction : getNeighbors(stoneColor)) {
+         for (Integer direction : getNeighbors(stoneColor)) {
             dependent[direction] = true;
          }
       }
 //      System.out.println(breathCount);
+   }
+
+   /**
+    * Sprawdza sąsiadów i aktualizuje oddechy oraz zależności
+    */
+   private void checkNeighborsV2() {
+      //zabiera oddechy wszystkim sąsiadom przeciwnego koloru
+      for (Integer direction : getNeighbors(stoneColor.opposite())) {
+         neighbors[direction].looseBreath(this, this, neighbors[direction]);
+      }
+
+      //ustawia sobie oddechy od pustych sąsiadów
+      for (Integer direction : getNeighbors(null)) {
+         this.inheritBreath(neighbors[direction]);
+      }
+
+      List<Integer> sameColorNeighbors = getNeighbors(stoneColor);
+      if (!sameColorNeighbors.isEmpty()) {
+
+         for (Integer direction : sameColorNeighbors) {
+            this.inheritBreath(neighbors[direction].breathTiles);
+         }
+
+         this.looseBreath(this, this, this);
+
+         for (Integer direction : sameColorNeighbors) {
+            neighbors[direction].inheritBreath(this.breathTiles);
+            neighbors[direction].looseBreath(this, this, this);
+         }
+      }
+
+
+   }
+
+   private boolean onlyBreath(GoTile tile) {
+      return breathTiles.contains(tile) && breathTiles.size() == 1;
    }
 }

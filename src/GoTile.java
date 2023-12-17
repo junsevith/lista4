@@ -184,6 +184,7 @@ public class GoTile {
    private void checkNeighbors() {
       for (Integer direction : getNeighbors(null)) {
          this.giveBreath(direction);
+//         System.out.println("daje oddech");
       }
 
       for (Integer direction : getNeighbors(stoneColor)) {
@@ -195,7 +196,7 @@ public class GoTile {
       }
 
       for (Integer direction : getNeighbors(stoneColor.opposite())) {
-         takeBreath(reverseDirection(direction));
+         neighbors[direction].takeBreath(reverseDirection(direction));
       }
 
       if (thereAreOtherBreaths()) {
@@ -203,5 +204,6 @@ public class GoTile {
             dependent[direction] = true;
          }
       }
+//      System.out.println(breathCount);
    }
 }

@@ -1,6 +1,4 @@
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.IOException;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.

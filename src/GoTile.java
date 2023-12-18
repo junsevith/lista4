@@ -191,7 +191,7 @@ public class GoTile {
             this.inheritBreath(neighbors[direction].breathTiles);
          }
 
-         this.looseBreath(this, this, this);
+         breathTiles.remove(this);
 
          for (Integer direction : sameColorNeighbors) {
             neighbors[direction].inheritBreath(this.breathTiles);
@@ -231,8 +231,8 @@ public class GoTile {
          }
 
          // usuwa siebie z oddechów, ponieważ dziedziczenie oddechów od sąsiadów nas tu dodało
-         this.looseBreath(this, this, this);
-
+//         this.looseBreath(this, this, this);
+         breathTiles.remove(this);
          //dodaje oddechy do sąsiadów tego samego koloru
          for (int i = 0; i < 4; i++) {
             GoTile neighbor = neighbors[i];

@@ -106,4 +106,22 @@ public class GoBoard {
    public int getSize() {
       return boardSize;
    }
+
+   public static GoBoard generateBoard(int size, String moveHistory) {
+      GoBoard board = new GoBoard(size);
+      String[] moves = moveHistory.split("\n");
+      for (String move : moves) {
+         if (move.isEmpty()) {
+            continue;
+         }
+         String[] args = move.split(" ");
+         if (args[1].equals("pas")) {
+            continue;
+         }
+         int x = Integer.parseInt(args[1]);
+         int y = Integer.parseInt(args[2]);
+         board.placeStone(x - 1, y - 1, Color.valueOf(args[0]));
+      }
+      return board;
+   }
 }

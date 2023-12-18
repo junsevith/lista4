@@ -22,4 +22,24 @@ public class GameRecorder {
          return lastMove.equals("pas") && secondLastMove.equals("pas");
       }
    }
+
+   public String getMoveHistory() {
+      StringBuilder sb = new StringBuilder();
+      for (String move : moves) {
+         sb.append(move);
+         sb.append("\n");
+      }
+      return sb.toString();
+   }
+
+   public Color[][] getState(int i){
+      if (i > boardStates.size() - 1 || i < -boardStates.size() ) {
+         return new Color[0][0];
+      }
+      if (i >= 0) {
+         return boardStates.get(i);
+      } else {
+         return boardStates.get(boardStates.size() + i);
+      }
+   }
 }

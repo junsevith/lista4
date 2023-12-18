@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Arrays;
 import java.util.Set;
 
 public class GoGame {
@@ -17,6 +18,14 @@ public class GoGame {
       this.out = new PrintWriter(out, true);
    }
 
+   /**
+    * Czyta odpowiedź z wejścia i sprawdza, czy jest w jednym ze zbiorów.
+    * Jeśli nie jest w żadnym z nich, wypisuje komunikat o niepoprawnej odpowiedzi i pyta ponownie.
+    *
+    * @param goodAnswers  zbiór pozytywnych odpowiedzi
+    * @param badAnswers  zbiór negatywnych odpowiedzi
+    * @return Jeśli jest w zbiorze goodAnswers, zwraca true, jeśli w badAnswers, zwraca false.
+    */
    public boolean readAnswer(Set<String> goodAnswers, Set<String> badAnswers) {
       try {
          String line = in.readLine();
@@ -38,6 +47,9 @@ public class GoGame {
       }
    }
 
+   /**
+    * Rozpoczyna grę
+    */
    public void startGame() throws IOException {
       out.println("Witaj w grze Go!");
       setBoard();
@@ -45,6 +57,9 @@ public class GoGame {
       beginGame();
    }
 
+   /**
+    * Ustawia rozmiar planszy
+    */
    private void setBoard() throws IOException {
       out.println("Podaj rozmiar planszy: ");
       try {
@@ -73,6 +88,9 @@ public class GoGame {
       }
    }
 
+   /**
+    * Ustawia graczy oraz komputery
+    */
    private void setPlayers() {
       out.println("Czy chcesz grać z komputerem? (t/n)");
       if (readAnswer(Set.of("t", "tak"), Set.of("n", "nie"))) {
@@ -90,18 +108,31 @@ public class GoGame {
       }
    }
 
+   /**
+    * Rozpoczyna grę
+    */
    private void beginGame() throws IOException {
       out.println("Zaczynamy grę!");
       GoPlayer activePlayer = black;
+//      recorder.recordBoardState(board.getState());
       while (gameIsNotOver()) {
          out.println(board.printBoard());
          out.println("Punkty czarnego: " + board.getCounter().getWhiteStones());
          out.println("Punkty białego: " + board.getCounter().getBlackStones());
          out.println("Teraz ruch wykonuje " + activePlayer.getName());
 
-         String move = activePlayer.takeTurn();
-         recorder.recordMove(move);
-         recorder.recordBoardState(board.getState());
+         while (true) {
+            String move = activePlayer.takeTurn();
+
+            if (Arrays.deepEquals(board.getState(), recorder.getState(-2))) {
+               out.println("Nie można wykonać ruchu ko");
+               board = GoBoard.generateBoard(board.getSize(), recorder.getMoveHistory());
+            } else {
+               recorder.recordMove(move);
+               recorder.recordBoardState(board.getState());
+               break;
+            }
+         }
 
          if (activePlayer == black) {
             activePlayer = white;
@@ -111,6 +142,10 @@ public class GoGame {
       }
    }
 
+   /**
+    * Sprawdza, czy gra się nie skończyła
+    * @return true, jeśli gra się nie skończyła, false, jeśli tak
+    */
    private boolean gameIsNotOver() {
       if (recorder.gameHalted()) {
          return !(black.askFinish() && white.askFinish());

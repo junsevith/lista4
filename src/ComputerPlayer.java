@@ -8,7 +8,7 @@ public class ComputerPlayer extends GoPlayer {
 
    @Override
    String takeTurn(GoBoard board) throws IOException {
-      return null;
+      return color + " pas computer";
    }
 
    @Override
@@ -22,6 +22,6 @@ public class ComputerPlayer extends GoPlayer {
 
    @Override
    boolean askFinish() {
-      return false;
+      return true;
    }
 }

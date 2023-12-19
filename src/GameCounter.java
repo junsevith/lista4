@@ -11,11 +11,11 @@ public class GameCounter {
       }
    }
 
-   public int getBlackStones() {
+   public int getBlackKilled() {
       return blackStones;
    }
 
-   public int getWhiteStones() {
+   public int getWhiteKilled() {
       return whiteStones;
    }
 }

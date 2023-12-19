@@ -46,12 +46,16 @@ public class Main {
             3 3
             3 2
             4 2
-            1 1
+            9 9
             2 2
             3 2
-            9 9
             9 8
+            9 7
             3 2
+            pas
+            pas
+            t
+            t
             """;
       InputStream in = new ByteArrayInputStream(ko.getBytes());
       GoGame game = new GoGame(in, System.out);

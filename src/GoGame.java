@@ -55,6 +55,7 @@ public class GoGame {
       setBoard();
       setPlayers();
       beginGame();
+      countPoints();
    }
 
    /**
@@ -117,14 +118,14 @@ public class GoGame {
 //      recorder.recordBoardState(board.getState());
       while (gameIsNotOver()) {
          out.println(board.printBoard());
-         out.println("Punkty czarnego: " + board.getCounter().getWhiteStones());
-         out.println("Punkty białego: " + board.getCounter().getBlackStones());
+         out.println("Punkty czarnego: " + board.getCounter().getWhiteKilled());
+         out.println("Punkty białego: " + board.getCounter().getBlackKilled());
          out.println("Teraz ruch wykonuje " + activePlayer.getName());
 
          while (true) {
             String move = activePlayer.takeTurn(board);
 
-            if (Arrays.deepEquals(board.getState(), recorder.getState(-2))) {
+            if (!move.split(" ")[1].equals("pas") && Arrays.deepEquals(board.getState(), recorder.getState(-2))) {
                out.println("Nie można wykonać ruchu ko");
                board = GoBoard.generateBoard(board.getSize(), recorder.getMoveHistory());
             } else {
@@ -151,6 +152,20 @@ public class GoGame {
          return !(black.askFinish() && white.askFinish());
       } else {
          return true;
+      }
+   }
+
+   private void countPoints() {
+      int blackPoints = board.getCounter().getWhiteKilled() + board.countTerritory(Color.BLACK);
+      int whitePoints = board.getCounter().getBlackKilled() + board.countTerritory(Color.WHITE);
+      out.println("Punkty czarnego: " + blackPoints);
+      out.println("Punkty białego: " + whitePoints);
+      if (blackPoints > whitePoints) {
+         out.println("Wygrał czarny!");
+      } else if (whitePoints > blackPoints) {
+         out.println("Wygrał biały!");
+      } else {
+         out.println("Remis!");
       }
    }
 }

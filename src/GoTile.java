@@ -253,4 +253,19 @@ public class GoTile {
    private boolean onlyBreath(GoTile tile) {
       return breathTiles.contains(tile) && breathTiles.size() == 1;
    }
+
+   public boolean countTerritory(Color color, Set<GoTile> territory) {
+      territory.add(this);
+      boolean isTerritory = true;
+      for (int i = 0; i < 4; i++) {
+         if (neighbors[i] != null) {
+            if (neighbors[i].getStoneColor() == null && !territory.contains(neighbors[i])){
+               isTerritory = isTerritory && neighbors[i].countTerritory(color, territory);
+            } else if (neighbors[i].getStoneColor() == color.opposite()) {
+               return false;
+            }
+         }
+      }
+      return isTerritory;
+   }
 }

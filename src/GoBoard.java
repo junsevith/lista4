@@ -1,3 +1,6 @@
+import java.util.HashSet;
+import java.util.Set;
+
 public class GoBoard {
    private final GoTile[][] board = new GoTile[19][19];
 
@@ -123,5 +126,25 @@ public class GoBoard {
          board.placeStone(x - 1, y - 1, Color.valueOf(args[0]));
       }
       return board;
+   }
+
+   public int countTerritory(Color color) {
+      Set<GoTile> already = new HashSet<>();
+      Set<GoTile> territory = new HashSet<>();
+
+      for (int i = 0; i < boardSize; i++) {
+         for (int j = 0; j < boardSize; j++) {
+            Set<GoTile> temp = new HashSet<>();
+            GoTile tile = board[i][j];
+            if ( tile.getStoneColor() == null && !already.contains(tile)) {
+               if (board[i][j].countTerritory(color, temp)) {
+                  territory.addAll(temp);
+               }
+               already.addAll(temp);
+            }
+         }
+      }
+
+      return territory.size();
    }
 }

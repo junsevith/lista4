@@ -82,12 +82,11 @@ public class GoTile {
 
    /**
     * Odbiera oddech z danego kierunku
-    * @param tile odbiera oddech z tego pola
-    * @param invoker pole, które wywołało metodę (żeby metoda nie wywołała się drugi raz na tym samym polu)
-    * @param source pole, które zapoczątkowało całą akcję (żeby metoda nie wywołała się drugi raz na tym samym polu)
+    * @param breath odbiera oddech z tego pola
     */
-   public void looseBreath(GoTile tile, GoTile invoker, GoTile source) {
-      breathTiles.remove(tile);
+   public void looseBreath(GoTile breath, Set<GoTile> already) {
+      already.add(this);
+      breathTiles.remove(breath);
 
 //      Jeśli używamy checkNeighborsV2() to musi być ten warunek
 //      if (stoneColor == null) {
@@ -97,8 +96,8 @@ public class GoTile {
       for (int i = 0; i < 4; i++) {
          GoTile neighbor = neighbors[i];
          if ( neighbor != null && neighbor.stoneColor == stoneColor) {
-            if (neighbor != tile && neighbor != source && neighbor != invoker) {
-               neighbor.looseBreath(tile, this, source);
+            if (neighbor != breath && !already.contains(neighbor)) {
+               neighbor.looseBreath(breath, already);
             }
          }
       }
@@ -175,7 +174,7 @@ public class GoTile {
    private void checkNeighborsV2() {
       //zabiera oddechy wszystkim sąsiadom przeciwnego koloru
       for (Integer direction : getNeighbors(stoneColor.opposite())) {
-         neighbors[direction].looseBreath(this, this, neighbors[direction]);
+         neighbors[direction].looseBreath(this, Set.of(this));
       }
 
       //ustawia sobie oddechy od pustych sąsiadów
@@ -195,7 +194,7 @@ public class GoTile {
 
          for (Integer direction : sameColorNeighbors) {
             neighbors[direction].inheritBreath(this.breathTiles);
-            neighbors[direction].looseBreath(this, this, this);
+            neighbors[direction].looseBreath(this, Set.of(this));
          }
       }
    }
@@ -210,7 +209,7 @@ public class GoTile {
          if (neighbor != null ) {
             if (neighbor.stoneColor == stoneColor.opposite()) {
                //zabiera oddechy od sąsiadów tego samego koloru
-               neighbor.looseBreath(this, this, neighbor);
+               neighbor.looseBreath(this, new HashSet<>(Set.of(this)));
             } else if (neighbor.stoneColor == null) {
                //ustawia sobie oddechy od pustych sąsiadów
                this.inheritBreath(neighbor);
@@ -239,7 +238,7 @@ public class GoTile {
             if (neighbor != null) {
                if (neighbor.stoneColor == stoneColor) {
                   neighbor.inheritBreath(this.breathTiles);
-                  neighbor.looseBreath(this, this, this);
+                  neighbor.looseBreath(this, new HashSet<>(Set.of(this)));
                }
             }
          }

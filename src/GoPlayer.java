@@ -2,12 +2,10 @@ import java.io.*;
 
 public abstract class GoPlayer {
    final Color color;
-   final GoBoard board;
-   GoPlayer(Color color, GoBoard board){
+   GoPlayer(Color color){
       this.color = color;
-      this.board = board;
    }
-   abstract String takeTurn() throws IOException;
+   abstract String takeTurn(GoBoard board) throws IOException;
 
    abstract String getName();
 

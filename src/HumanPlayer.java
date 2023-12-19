@@ -6,14 +6,14 @@ public class HumanPlayer extends GoPlayer {
 
    PrintWriter out;
 
-   public HumanPlayer(Color color, GoBoard board, BufferedReader in, PrintWriter out) {
-      super(color, board);
+   public HumanPlayer(Color color, BufferedReader in, PrintWriter out) {
+      super(color);
       this.in = in;
       this.out = out;
    }
 
    @Override
-   public String takeTurn() {
+   public String takeTurn(GoBoard board) {
       String output = "";
       while (output.isEmpty()){
          try {
@@ -32,7 +32,7 @@ public class HumanPlayer extends GoPlayer {
                throw new IllegalArgumentException();
             }
 
-            if (!super.board.placeStone(x - 1, y - 1, super.color)){
+            if (!board.placeStone(x - 1, y - 1, super.color)){
                throw new IllegalArgumentException();
             } else {
                output = color + " " + x + " " + y;

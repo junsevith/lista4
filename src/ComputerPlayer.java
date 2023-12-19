@@ -1,11 +1,14 @@
+import java.io.IOException;
+
 public class ComputerPlayer extends GoPlayer {
-   ComputerPlayer(Color color, GoBoard board) {
-      super(color, board);
+   ComputerPlayer(Color color) {
+      super(color);
    }
 
+
    @Override
-   public String takeTurn() {
-      return "";
+   String takeTurn(GoBoard board) throws IOException {
+      return null;
    }
 
    @Override

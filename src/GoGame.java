@@ -96,15 +96,15 @@ public class GoGame {
       if (readAnswer(Set.of("t", "tak"), Set.of("n", "nie"))) {
          out.println("Wybierz kolor: (b/c)");
          if (readAnswer(Set.of("b", "biały"), Set.of("c", "czarny"))) {
-            black = new HumanPlayer(Color.BLACK, board, in, out);
-            white = new ComputerPlayer(Color.WHITE, board);
+            black = new HumanPlayer(Color.BLACK, in, out);
+            white = new ComputerPlayer(Color.WHITE);
          } else {
-            black = new ComputerPlayer(Color.BLACK, board);
-            white = new HumanPlayer(Color.WHITE, board, in, out);
+            black = new ComputerPlayer(Color.BLACK);
+            white = new HumanPlayer(Color.WHITE, in, out);
          }
       } else {
-         black = new HumanPlayer(Color.BLACK, board, in, out);
-         white = new HumanPlayer(Color.WHITE, board, in, out);
+         black = new HumanPlayer(Color.BLACK, in, out);
+         white = new HumanPlayer(Color.WHITE, in, out);
       }
    }
 
@@ -122,7 +122,7 @@ public class GoGame {
          out.println("Teraz ruch wykonuje " + activePlayer.getName());
 
          while (true) {
-            String move = activePlayer.takeTurn();
+            String move = activePlayer.takeTurn(board);
 
             if (Arrays.deepEquals(board.getState(), recorder.getState(-2))) {
                out.println("Nie można wykonać ruchu ko");
